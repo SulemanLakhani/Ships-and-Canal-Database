@@ -1,3 +1,9 @@
+SELECT passage.passage_date, passage_entries.ship_id, passage.canal_id
+group4-> FROM passage NATURAL JOIN passage_entries;
+
+
+
+
 # sample2.py
 
 import getpass
