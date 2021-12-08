@@ -1,6 +1,6 @@
 # CSCI 236 Final Project Repository
 
-**Author**: Ryan Mero, Suleman Lakhani, Cole Parker
+**Author**: Ryan Mero, Suleman Lakhani, Parker Collins
 
 This is the Repository for CSCI 236 Final Project - Ships and Cargo. 
 
