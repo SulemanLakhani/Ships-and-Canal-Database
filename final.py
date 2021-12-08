@@ -8,121 +8,54 @@ import getpass
 from psycopg2 import connect
 import sys
 
-def main() :
 # Logs into the database 
-    dbuser = getpass.getuser()
-    dbpass = getpass.getpass()
-    connStr = ("host=pascal.rmc.edu dbname=group4 user=%s password=%s" % \
-                        (dbuser, dbpass))
-    conn = connect(connStr) 
-    dbcursor = conn.cursor()
+dbuser = getpass.getuser()
+dbpass = getpass.getpass()
+connStr = ("host=pascal.rmc.edu dbname=group4 user=%s password=%s" % (dbuser, dbpass))
+conn = connect(connStr) 
+dbcursor = conn.cursor()
 
-# Functions to return the invoice
-    invoiceNum = getArgs() 
-    qResult = select(dbcursor, invoiceNum) 
 
-# Close connection
-    conn.close() 
+
+def totalFunction() :
+       
+    # create temp tables 
     
-# Gets the invoice number as an argument
-def getArgs() :
-    invoiceNum = 0
-    if (len(sys.argv) > 0) : 
-        for i in range(1,len(sys.argv)) :
-            invoiceNum =  int(sys.argv[i])
-# return arg
-            return invoiceNum
-    else :
-        return
-
-# get select statements to create the information 
-def select(dbcursor, invoiceNum) :
-# Create temp tables
-    dbcursor.execute("""
-                       CREATE TEMP TABLE table1 AS
-                       SELECT *
-                       FROM hold
-                       NATURAL JOIN ships;
-                     """)
-# Create another table 
-    dbcursor.execute("""
-                       CREATE TEMP TABLE table2 AS
-                       SELECT *
-                       FROM cargo 
-                       NATURAL JOIN canals;
-                     """)
-# Combine the two temp tables to get the weight
-    dbcursor.execute("""
-                       CREATE TEMP TABLE finalTable AS
-                       SELECT ship_id, ship_weight, cargo_id, num_containers,
-                       (ship_weight + (cont_weight * num_containers)) AS "weight"
-                       FROM table1 NATURAL JOIN table2;
-                     """)
+    dbcursor.execute("Set search_path to final")
+    
+    dbcursor.execute("CREATE TEMP TABLE t1 as SELECT ship_id, ship_name, ship_weight FROM ships group by ship_id")
     
     
-# Combine tables to get the total value
-    dbcursor.execute("""
-                       CREATE TEMP TABLE finalTable AS
-                       SELECT ship_id, ship_weight, cargo_id, num_containers,
-                       (value * num_containers) AS "total_value"
-                       FROM table1 NATURAL JOIN table2;
-                     """)
-# use the invoice num argument 
-    dbcursor.execute("""
-                       SELECT ship_id, date
-                       FROM finalTable WHERE canal_id = %d;
-                     """ % invoiceNum)
+    dbcursor.execute("CREATE TEMP TABLE t2 as SELECT ship_id, ship_name, sum(cont_weight * num_containers) as total_cont_weight, shipment_date FROM t1 NATURAL JOIN hold")
+    
 
-# obtain the records
-    records = dbcursor.fetchone()
-    shipID = records[0]
-    canalID = records[1]
-    date = records[3]
-
-    dbcursor.execute("""
-    	               SELECT SUM(weight) FROM finalTable WHERE canal_id = %d;
-    	             """ % invoiceNum)
-    records = dbcursor.fetchone()
-# set the total
-    total = records[0]
-
-    dbcursor.execute("""
-                       SELECT ship_id, ship_weight, cont_weight, num_containers, weight, total_value
-                       FROM finalTable WHERE canal_id = %d;
-                     """ % invoiceNum)
-
-    records = dbcursor.fetchall()
-# Print 
-    printFormat(records, invoiceNum, shipID, state_or_private, date, total)
-
-def printFormat(result, invoiceNum, shipID, state_or_private, date, total):
-
-# print out the formatted version of the report	
-	print("   TOTAL WEIGHT AND VALUE THROUGH CANALS          ")
-
-	print(" 	  Invoice #%d\n" % invoiceNum)
-    print("        #%3d - %-20s" % (canalID))
-    print("               ", date)
-	print()
-	print("SHIP#      WEIGHT                  VALUE          ")
-	print("--------   ---------------------   -------       ")
+    dbcursor.execute("Select ship_id, ship_name, ship_weight, num_containers, cont_weight, value, sum(ship_weight + (cont_weight * num_containers)) AS weight From t1 natural join t2")
+    
+    recordList = dbcursor.fetchall() 
+    
+    
+	# print out the formatted version of the report	
+    print("TOTAL WEIGHT AND VALUE THROUGH PANAMA CANAL")
+    print("                                    2011-10-13                               ")
+    print()
 	
+    print("SHIP#  SHIP-NAME SHIP_WEIGHT NUM_CONTAINERS CONT_WEIGHT VALUE  TOTAL_WEIGHT")
+    print("-----  --------- ----------- -------------- ------------ -----  ------------")
+
+	# select the records to be displayed
+    for record in recordList :
+	    print("%5d    %-10d   %-5.2f  %-4d   %-5.2f  %-5d   %-6.2f" % record)
+		
+    print("----------------------------------------------------------------------------")
 	
+	# print out the total weight and values
+    total_weight = dbcursor.execute("Select sum(weight) from t1")
 	
-	weight = 0 
-	value = 0 
-
-# select the records to be displayed
-	for record in recordList :
-		print("%4d      %-10d   %-5d" % record)
-		weight = weight + weight1 
-		value = value + value1
-
-
-	print("----------------------------------------------------")
-	print("Total WEIGHT: %d" % weight)
-	print("Total VALUE:  %d" % value)
+    total_value = dbcursor.execute("Select sum(value) from t1")
 	
-main()
+    print("Total WEIGHT: %d" % total_weight)
+    print("Total VALUE:  %d" % total_value)
 
+totalFunction()
 
+conn.close()
