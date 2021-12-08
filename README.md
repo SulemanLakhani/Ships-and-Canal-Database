@@ -1,8 +1,4 @@
-# cs236FinalProject
-cs236 FinalProject Repository
-
-
-# CSCI 213 Lab 10: Working with Git
+# CSCI 236 Final Project Repository
 
 **Author**: Ryan Mero, Suleman Lakhani, Cole Parker
 
