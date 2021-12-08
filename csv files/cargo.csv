@@ -1,0 +1,10 @@
+﻿cargo_id,cargo_type,value (dollars),cont_weight (tons)
+1,crude oil,9300,19
+2,paper,5800,8
+3,grain,5300,14
+4,coal,7200,18
+5,iron ore,12000,20
+6,cement,6000,17
+7,sugar,8400,13
+8,salt,8700,9
+9,wood,5000,15
