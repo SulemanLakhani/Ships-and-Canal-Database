@@ -17,7 +17,7 @@ dbcursor = conn.cursor()
 
 
 
-def totalFunction() :
+def totalFunction(choice) :
        
     # create temp tables 
     
@@ -34,16 +34,16 @@ def totalFunction() :
     
     
 	# print out the formatted version of the report	
-    print("           TOTAL WEIGHT AND VALUE THROUGH PANAMA CANAL")
-    print("                         2011-10-13                              ")
+    print("           TOTAL WEIGHT AND VALUE                       ")
+    print("                         %s                              "  % choice)
     print()
 	
-    print("SHIP#   SHIPMENT_DATE TOTAL_WEIGHT TOTAL VALUE")
-    print("---------------------------------------------------------")
+    print("SHIP#    SHIPMENT_DATE TOTAL_WEIGHT TOTAL VALUE")
+    print("-----    ------------- ------------ -----------")
 
 	# select the records to be displayed
     for record in recordList :
-	    print("%5d   %10s  %-8d %-8d" % record)
+	    print("%5d   %10s    %-8d     $ %-8d" % record)
 		
     print("-----------------------------------------------------")
 	
@@ -59,8 +59,11 @@ def totalFunction() :
     total_value = dbcursor.fetchall()
 	
     print("Total WEIGHT: %d" % total_weight[0])
-    print("Total VALUE:  %d" % total_value[0])
+    print("Total VALUE:  $ %d" % total_value[0])
+    
+    
+choice = input("Enter a date " )
 
-totalFunction()
+totalFunction(choice)
 
 conn.close()
